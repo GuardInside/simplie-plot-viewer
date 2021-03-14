@@ -78,9 +78,9 @@ int PlotImpl::progress() const
 	int percents = 0;
 
 	if( m_series.size() > 0 ) {
-		percents += 0.5 * static_cast<int>( std::ceil(100.0 * (m_series.last().x() - m_from) / (m_to - m_from)) );
-		percents += 0.25 * static_cast<int>( std::ceil(100.0 * m_observedPoints / m_series.size()) );
-		percents += 0.25 * static_cast<int>( std::ceil(100.0 * m_printedPoints / m_series.size()) );
+		percents += 0.30 * static_cast<int>( std::ceil(100.0 * (m_series.last().x() - m_from) / (m_to - m_from)) );
+		percents += 0.30 * static_cast<int>( std::ceil(100.0 * m_observedPoints / m_series.size()) );
+		percents += 0.40 * static_cast<int>( std::ceil(100.0 * m_printedPoints / m_series.size()) );
 	}
 
 	return percents;

@@ -2,6 +2,8 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QWaitCondition>
+#include <QAtomicInt>
 #include <QVector>
 #include <QPointF>
 #include <QImage>
@@ -39,6 +41,7 @@ signals:
 
 private:
 	void run();
+	void pauseTest();
 	void calculate();
 	void findMaxAbs();
 	void render();
@@ -49,8 +52,11 @@ private:
 	QString m_fName;
 	double m_from = 0, m_to = 0, m_step = 0;
 	double m_A = 0, m_B = 0, m_C = 0;
-	bool m_pause = false;
 	double yMaxAbs = 0, xMaxAbs = 0;
+
+	QWaitCondition m_activeCalculate;
+	QMutex m_calculating;
+	QAtomicInt m_paused = 0;
 
 	/* Обработанные точки добавляются пакетом,
 	 * рамзер которого определяет segmentSize */

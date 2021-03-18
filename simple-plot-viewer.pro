@@ -1,6 +1,6 @@
 include(lib/plot/plot.pri)
 
-VERSION = 1.0
+VERSION = 1.1
 QT += widgets
 
 CONFIG += c++11

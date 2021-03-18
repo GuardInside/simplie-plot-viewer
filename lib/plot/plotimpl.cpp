@@ -58,12 +58,15 @@ void PlotImpl::setInterval(double from, double to, double step) {
 }
 
 void PlotImpl::pause(bool state) {
-	m_pause = state;
+	m_paused.storeRelaxed(static_cast<int>(state));
+
+	if( !state )
+		m_activeCalculate.notify_one();
 }
 
 bool PlotImpl::isPaused() const
 {
-	return m_pause;
+	return static_cast<bool>( m_paused );
 }
 
 QImage PlotImpl::curve() const
@@ -98,11 +101,18 @@ void PlotImpl::clear()
 /* Private */
 
 void PlotImpl::run() {
+	QMutexLocker locker (&m_calculating);
 	calculate();
 	findMaxAbs();
 	render();
 
 	emit resultReady();
+}
+
+void PlotImpl::pauseTest()
+{
+	if( m_paused.loadRelaxed() )
+		m_activeCalculate.wait(&m_calculating);
 }
 
 void PlotImpl::calculate()
@@ -118,7 +128,7 @@ void PlotImpl::calculate()
 		if( isInterruptionRequested() )
 			return;
 
-		while(m_pause);
+		pauseTest();
 
 		pointSegment << QPointF(x, m_f(x));
 
@@ -144,7 +154,7 @@ void PlotImpl::findMaxAbs()
 			if( isInterruptionRequested() )
 				return;
 
-			while(m_pause);
+			pauseTest();
 
 			yMaxAbs = qMax(qAbs(yMaxAbs), qAbs(m_series[i].y()));
 
@@ -172,7 +182,7 @@ void PlotImpl::render()
 			if( isInterruptionRequested() )
 				return;
 
-			while(m_pause);
+			pauseTest();
 
 			// Нормировка
 			np = m_series[i];
